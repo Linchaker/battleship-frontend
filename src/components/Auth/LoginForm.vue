@@ -1,14 +1,32 @@
 <template>
   <div class="login-form col-4 offset-4">
     <h2>Login</h2>
-    
-    <div>
-  </div>
+    <form ref="form" @submit.prevent="submit" autocomplete="off" class="needs-validation" novalidate>
+      <div class="mb-3">
+        <label for="email" class="form-label">Email:</label>
+        <input v-model.trim="formData.email" type="email" :class="{'form-control':true, 'is-invalid' : errors.email}" v-on:blur="validateField('email')">
+        <div class="invalid-feedback" v-if="errors.email">
+          {{ errors.email }}
+        </div>
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Password:</label>
+        <input v-model.trim="formData.password" type="password" :class="{'form-control':true, 'is-invalid' : errors.password}" v-on:blur="validateField('password')">
+        <div class="invalid-feedback" v-if="errors.password">
+          {{ errors.password }}
+        </div>
+      </div>
+      <button class="btn btn-secondary" type="submit">Sign In</button>
+    </form>
+    <div class="mt-4">
+      <p>Still no account? <RouterLink :to="{ name: 'register' }">Sign Up</RouterLink></p>
+    </div>
   </div>
 </template>
 
 <script>
 
+import { loginAuthService } from '@/services/auth.service'
 
 export default {
   data() {
@@ -28,32 +46,22 @@ export default {
   },
   methods: {
     validateField: function(fieldName) {
-      if (fieldName === 'name') {
-        this.validName(this.formData.name);
-      } else if (fieldName === 'email') {
+      if (fieldName === 'email') {
         this.validEmail(this.formData.email);
       } else if (fieldName === 'password') {
         this.validPassword(this.formData.password);
-        this.validPasswordConfirmation(this.formData.password_confirmation);
-      } else if (fieldName === 'password_confirmation') {
-        this.validPassword(this.formData.password);
-        this.validPasswordConfirmation(this.formData.password_confirmation);
       }
     },
-    validate : function() {     
-      // Очищаем значения ошибок перед выполнением проверок
+    validate : function() {
       this.errors = {
-        name: '',
         email: '',
         password: '',
-        password_confirmation: '',
       };
 
       if (
         this.validEmail(this.formData.email) 
         && this.validPassword(this.formData.password) 
-        && this.validPasswordConfirmation(this.formData.password_confirmation)
-        && this.validName(this.formData.name)) {
+        ) {
         this.valid = true;
       } else {
         this.valid = false;
@@ -66,34 +74,16 @@ export default {
         this.errors.email = '';
         return true;
       } else {
-        this.errors.email = 'Пожалуйста, введите корректный email.';
+        this.errors.email = 'Please enter a valid email.';
       }
     },
 
     validPassword : function(password) {
-      if (password.length >= 6) {
+      if (password.length) {
         this.errors.password = '';
         return true;
       } else {
-        this.errors.password = 'Минимальная длинна пароль 6 символов.';
-      }
-    },
-
-    validPasswordConfirmation : function(password) {
-      if (password === this.formData.password) {
-        this.errors.password_confirmation = '';
-        return true;
-      } else {
-        this.errors.password_confirmation = 'Пароли не совпадают.';
-      }
-    },
-
-    validName : function(name) {
-      if (name.length) {
-        this.errors.name = '';
-        return true;
-      } else {
-        this.errors.name = 'Имя обязательно.';
+        this.errors.password = 'Password  required.';
       }
     },
 
@@ -101,21 +91,16 @@ export default {
       this.validate();
       if (this.valid) {
         this.submitted = true;
-        // request to server
-        this.registerRequest()
+        this.loginRequest()
       }
     },
 
-    registerRequest() {
-      
-      registerAuthService(this.formData)
+    loginRequest() {
+    
+      loginAuthService(this.formData)
             .then(response => {
                 if (response.status >= 200 && response.status <= 204) {
-                  localStorage.setItem('user', JSON.stringify({
-                    name: response.data.user.name || null,
-                    email: response.data.user.email || null,
-                  }));
-                  localStorage.setItem('token', JSON.stringify(response.data.token));
+                  this.$router.push('/')
                 }
                 if (response.status === 422 && response.data.errors) {
                     response.data.errors.forEach((el) => {
@@ -126,9 +111,6 @@ export default {
             })
             .catch(error => console.error(error))
             .finally(() => {
-                // disableBtn(submitBtn, false);
-                // preloader.hideAbsolute();
-                // resetValidationsWhenChange(form);
                 console.log(this.errors);
             });
     }
@@ -137,7 +119,7 @@ export default {
 </script>
 
 <style scoped>
-.regitration-form {
+.login-form {
   margin-top: 10px;
   text-align: center;
   background-color: aliceblue;

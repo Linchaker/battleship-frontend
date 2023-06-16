@@ -4,12 +4,15 @@ import authHeader from './auth-header'
 
 export function loginAuthService(userLogin) {
   return Axios.post('/auth/login', userLogin)
-    .then(res => {
-      if (res.data.token) {
-        localStorage.setItem('user', JSON.stringify(res.data.token))
-        return res.data
+    .then(response => {
+      if (response.status >= 200 && response.status <= 204) {
+        localStorage.setItem('user', JSON.stringify({
+          name: response.data.user.name || null,
+          email: response.data.user.email || null,
+        }));
+        localStorage.setItem('token', JSON.stringify(response.data.token));
       }
-      return res
+      return response
     })
     .catch(error => error)
 }

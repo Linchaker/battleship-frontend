@@ -33,7 +33,7 @@
     
       <button class="btn btn-secondary" type="submit">Sign Up</button>
     </form>
-    <div class="mt-2">
+    <div class="mt-4">
       <p>Already have account? <RouterLink :to="{ name: 'login' }">Sign In</RouterLink></p>
     </div>
   </div>
@@ -137,7 +137,6 @@ export default {
       this.validate();
       if (this.valid) {
         this.submitted = true;
-        // request to server
         this.registerRequest()
       }
     },
@@ -147,11 +146,7 @@ export default {
       registerAuthService(this.formData)
             .then(response => {
                 if (response.status >= 200 && response.status <= 204) {
-                  localStorage.setItem('user', JSON.stringify({
-                    name: response.data.user.name || null,
-                    email: response.data.user.email || null,
-                  }));
-                  localStorage.setItem('token', JSON.stringify(response.data.token));
+                  this.$router.push({ name: 'login'})
                 }
                 if (response.status === 422 && response.data.errors) {
                     response.data.errors.forEach((el) => {
