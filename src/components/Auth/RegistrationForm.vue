@@ -40,7 +40,6 @@
 </template>
 
 <script>
-import { registerAuthService } from '@/services/auth.service'
 
 export default {
   data() {
@@ -143,25 +142,18 @@ export default {
 
     registerRequest() {
       
-      registerAuthService(this.formData)
-            .then(response => {
-                if (response.status >= 200 && response.status <= 204) {
-                  this.$router.push({ name: 'login'})
-                }
-                if (response.status === 422 && response.data.errors) {
-                    response.data.errors.forEach((el) => {
-                      this.errors[el.path] = el.msg
-                    })
-                
-                }
+      this.$store.dispatch('auth/register', this.formData).then(
+        () => {
+          this.$router.push({ name: 'login'})
+        },
+        error => {
+          if (error.response && error.response.data) {
+            error.response.data.errors.forEach((el) => {
+              this.errors[el.path] = el.msg
             })
-            .catch(error => console.error(error))
-            .finally(() => {
-                // disableBtn(submitBtn, false);
-                // preloader.hideAbsolute();
-                // resetValidationsWhenChange(form);
-                console.log(this.errors);
-            });
+          }
+        }
+      );
     }
   }
 };

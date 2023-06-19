@@ -26,8 +26,6 @@
 
 <script>
 
-import { loginAuthService } from '@/services/auth.service'
-
 export default {
   data() {
     return {
@@ -43,6 +41,16 @@ export default {
       valid : false,
       submitted : false,
     };
+  },
+  computed: {
+    loggedIn() {
+      return this.$store.state.auth.status.loggedIn;
+    }
+  },
+  created() {
+    if (this.loggedIn) {
+      this.$router.push('/');
+    }
   },
   methods: {
     validateField: function(fieldName) {
@@ -96,23 +104,19 @@ export default {
     },
 
     loginRequest() {
-    
-      loginAuthService(this.formData)
-            .then(response => {
-                if (response.status >= 200 && response.status <= 204) {
-                  this.$router.push('/')
-                }
-                if (response.status === 422 && response.data.errors) {
-                    response.data.errors.forEach((el) => {
+
+      this.$store.dispatch('auth/login', this.formData).then(
+            () => {
+              this.$router.push('/');
+            },
+            error => {
+              if (error.response && error.response.data) {
+                error.response.data.errors.forEach((el) => {
                       this.errors[el.path] = el.msg
-                    })
-                
-                }
-            })
-            .catch(error => console.error(error))
-            .finally(() => {
-                console.log(this.errors);
-            });
+                })
+              }
+            }
+          );
     }
   }
 };
