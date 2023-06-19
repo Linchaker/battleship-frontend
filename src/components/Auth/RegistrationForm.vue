@@ -124,11 +124,11 @@ export default {
     },
 
     validName : function(name) {
-      if (name.length) {
+      if (name.length && name.length <= 10) {
         this.errors.name = '';
         return true;
       } else {
-        this.errors.name = 'Имя обязательно.';
+        this.errors.name = 'Name required. Max 16 chars.';
       }
     },
 

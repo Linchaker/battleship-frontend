@@ -13,7 +13,7 @@ const initialState = user
       login({ commit }, user) {
         return AuthService.login(user).then(
           user => {
-            commit('loginSuccess', user);
+            commit('loginSuccess', user.user);
             return Promise.resolve(user);
           },
           error => {
