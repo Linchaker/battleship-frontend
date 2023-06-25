@@ -28,6 +28,21 @@ const router = createRouter({
       meta: { auth: true },
       component: HomeView,
     },
+
+    {
+      path: '/game/:gameId',
+      name: 'gameWithId',
+      meta: { auth: true },
+      component: () => import('../components/Game/Game.vue'),
+    },
+    {
+      path: '/game',
+      name: 'game',
+      meta: { auth: true },
+      component: () => import('../components/Game/Game.vue'),
+    },
+
+    
     {
       path: '/about',
       name: 'about',

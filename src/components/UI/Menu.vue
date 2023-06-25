@@ -2,7 +2,7 @@
   <div class="menu">
     <div v-if="currentUser" class="navbar-nav ml-auto">
         <div class="mb-2"><strong>Hi, {{ currentUser.name  }}!</strong></div>
-        <div><RouterLink class="btn btn-secondary mb-3" to="/">Play</RouterLink></div>
+        <div><RouterLink class="btn btn-secondary mb-3" to="/game">Play</RouterLink></div>
         <div><button class="btn btn-secondary" @click.prevent="logOut">Exit</button></div>
     </div>
   </div>
