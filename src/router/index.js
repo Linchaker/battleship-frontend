@@ -30,13 +30,7 @@ const router = createRouter({
     },
 
     {
-      path: '/game/:gameId',
-      name: 'gameWithId',
-      meta: { auth: true },
-      component: () => import('../components/Game/Game.vue'),
-    },
-    {
-      path: '/game',
+      path: '/game/:gameId?',
       name: 'game',
       meta: { auth: true },
       component: () => import('../components/Game/Game.vue'),
@@ -57,8 +51,13 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const isAuthenticated = localStorage.getItem('user') !== null;
+  const gameId = to.params.gameId;
+
 
   if (to.meta.auth && !isAuthenticated) {
+    if (gameId) {
+      localStorage.setItem('gameId', gameId);
+    }
     next('/auth/login');
   } else {
     next();

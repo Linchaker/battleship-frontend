@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <div class="game-link">
-      <RouterLink target="_blank" class="btn-primary mb-3" :to="{ name: 'gameWithId', params: { gameId: game ? game._id : '123' } }">Game ID:  {{ game ? game._id : '' }}</RouterLink>
+      <RouterLink target="_blank" class="btn-primary mb-3" :to="{ name: 'game', params: { gameId: game ? game._id : '123' } }">Game ID:  {{ game ? game._id : '' }}</RouterLink>
     </div>
     <div class="game-wrapper">
       <div class="game-block">
@@ -23,13 +23,44 @@ export default {
     }
   },
   mounted() {
-    this.game = JSON.parse('{"status":"not_started","ownerStatus":"not_ready","oponentStatus":"not_ready","data":{"ownerData":{"board":{"size":10,"hits":[],"occupied":[{"x":10,"y":10}]},"fleet":[{"size":1,"orientation":"x","position":{"x":10,"y":10},"state":[{"deck":1,"position":{"x":10,"y":10},"status":true}],"status":true},{"size":1,"orientation":"x","position":{"x":7,"y":2},"state":[{"deck":1,"position":{"x":7,"y":2},"status":true}],"status":true},{"size":1,"orientation":"x","position":{"x":3,"y":9},"state":[{"deck":1,"position":{"x":3,"y":9},"status":true}],"status":true},{"size":1,"orientation":"x","position":{"x":8,"y":9},"state":[{"deck":1,"position":{"x":8,"y":9},"status":true}],"status":true}]}},"_id":"6498624b9d9ab7f711962cc7"}')
-    console.log(this.game);
+    const gameId = this.$route.params.gameId;
+    if (this.$store.state.play.status.gameIsset) {
+      this.game = this.$store.state.play.game
+    } else {
+      if (gameId) {
+        this.findGame(gameId)
+      } else {
+        this.startGame()
+      }
+    }
+    
+    // this.game = JSON.parse('{"status":"not_started","ownerStatus":"not_ready","oponentStatus":"not_ready","data":{"ownerData":{"board":{"size":10,"hits":[],"occupied":[{"x":10,"y":10}]},"fleet":[{"size":1,"orientation":"x","position":{"x":10,"y":10},"state":[{"deck":1,"position":{"x":10,"y":10},"status":true}],"status":true},{"size":1,"orientation":"x","position":{"x":7,"y":2},"state":[{"deck":1,"position":{"x":7,"y":2},"status":true}],"status":true},{"size":1,"orientation":"x","position":{"x":3,"y":9},"state":[{"deck":1,"position":{"x":3,"y":9},"status":true}],"status":true},{"size":1,"orientation":"x","position":{"x":8,"y":9},"state":[{"deck":1,"position":{"x":8,"y":9},"status":true}],"status":true}]}},"_id":"6498624b9d9ab7f711962cc7"}')
+    // console.log(this.game);
   },
   computed: {
     currentUser() {
       return this.$store.state.auth.user;
     },
+  },
+  methods: {
+    startGame() {
+      this.$store.dispatch('play/createGame').then(
+            (game) => {
+              console.log(game);
+              this.game = game
+            },
+            error => console.log(error)
+          );
+    },
+    findGame(gameId) {
+      this.$store.dispatch('play/findGame/' + gameId).then(
+            (game) => {
+              console.log(game);
+              this.game = game
+            },
+            error => console.log(error)
+          );
+    }
   }
 }
 

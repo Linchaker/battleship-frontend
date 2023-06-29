@@ -107,7 +107,13 @@ export default {
 
       this.$store.dispatch('auth/login', this.formData).then(
             () => {
-              this.$router.push('/');
+              let gameId = localStorage.getItem('gameId')
+              if (gameId) {
+                localStorage.removeItem('gameId')
+                this.$router.push({ name: 'game', params: { gameId }})
+              } else {
+                this.$router.push('/');
+              }
             },
             error => {
               if (error.response && error.response.data) {
