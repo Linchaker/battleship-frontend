@@ -26,7 +26,7 @@
 
   function logOut() {
     store.dispatch('auth/logout')
-    router.push('auth/login')
+    router.push({name: 'login'})
   }
 
   onMounted(() => {

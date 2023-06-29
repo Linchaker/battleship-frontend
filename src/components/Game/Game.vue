@@ -53,7 +53,7 @@ export default {
           );
     },
     findGame(gameId) {
-      this.$store.dispatch('play/findGame/' + gameId).then(
+      this.$store.dispatch('play/findGame', gameId).then(
             (game) => {
               console.log(game);
               this.game = game
