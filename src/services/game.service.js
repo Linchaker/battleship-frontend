@@ -5,7 +5,7 @@ class GameService {
 
   createGame() {
     return Axios
-      .get('/play/create', { headers: authHeader() })
+      .post('/play', { headers: authHeader() })
       .then(response => {
         if (response.data.game) {
           localStorage.setItem('game', JSON.stringify(response.data.game));
@@ -16,7 +16,7 @@ class GameService {
 
   findGame(gameId) {
     return Axios
-      .get('/play/find/' + gameId, { headers: authHeader() })
+      .get('/play/' + gameId, { headers: authHeader() })
       .then(response => {
         if (response.data.game) {
           localStorage.setItem('game', JSON.stringify(response.data.game));
