@@ -21,7 +21,7 @@ class GameService {
         if (response.data.game) {
           localStorage.setItem('game', JSON.stringify(response.data.game));
         }
-        return response.data;
+        return response.data.game;
       });
   }
 
