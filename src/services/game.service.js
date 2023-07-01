@@ -5,12 +5,12 @@ class GameService {
 
   createGame() {
     return Axios
-      .post('/play', { headers: authHeader() })
+      .post('/play', [], { headers: authHeader() })
       .then(response => {
         if (response.data.game) {
           localStorage.setItem('game', JSON.stringify(response.data.game));
         }
-        return response.data;
+        return response.data.game;
       });
   }
 
