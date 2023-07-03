@@ -34,6 +34,17 @@ const initialState = game
           }
         );
       },
+      shot({ commit }, data) {
+        return GameService.shot(data).then(
+          game => {
+            commit('shotSuccess', game);
+            return Promise.resolve(game);
+          },
+          error => {
+            return Promise.reject(error);
+          }
+        );
+      },
     },
     mutations: {
       createGameSuccess(state, game) {
@@ -51,6 +62,10 @@ const initialState = game
       findGameFailure(state) {
         state.status.gameIsset = false;
         state.game = null;
+      },
+      shotSuccess(state, game) {
+        state.status.gameIsset = true;
+        state.game = game;
       },
     }
   };

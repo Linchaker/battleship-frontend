@@ -27,7 +27,9 @@
           <div
             v-for="col in boardSize"
             :key="col"
-            class="cell"
+            class="cell oponent-board"
+            @click="shot(row, col)"
+            :class="getOponentCellClass(row, col)"
           ></div>
         </div>
       </div>
@@ -66,7 +68,7 @@ export default {
     boardSize() {
       return this.game ? this.game.data.ownerData.board.size : 10
     },
-    userGameData() {
+    ownerGameData() {
       if (!this.game) {
         return "";
       }
@@ -75,6 +77,17 @@ export default {
         return this.game.data.ownerData
       } else {
         return this.game.data.oponentData
+      }
+    },
+    oponentGameData() {
+      if (!this.game) {
+        return "";
+      }
+
+      if (this.game.ownerUserId === this.currentUser._id) {
+        return this.game.data.oponentData
+      } else {
+        return this.game.data.ownerData
       }
     }
   },
@@ -94,7 +107,6 @@ export default {
     startGame() {
       this.$store.dispatch('play/createGame').then(
             (game) => {
-              console.log(game);
               this.game = game
             },
             error => console.log(error)
@@ -103,12 +115,27 @@ export default {
     findGame(gameId) {
       this.$store.dispatch('play/findGame', gameId).then(
             (game) => {
+              this.game = game
+            },
+            error => console.log(error)
+          );
+    },
+    shot(row, col) {
+      const position = {x: row, y: col}
+      const data = {
+        gameId: this.game._id,
+        position
+      }
+      
+      this.$store.dispatch('play/shot', data).then(
+            (game) => {
               console.log(game);
               this.game = game
             },
             error => console.log(error)
           );
     },
+
     hasDeck(row, col, fleet, isHit = false) {
       for (const ship of fleet) {
         for (const deck of ship.state) {
@@ -128,26 +155,60 @@ export default {
       
       return null;
     },
+
+    hasHit(row, col, board) {
+      for (const hit of board.hits) {
+        if (hit.x === row && hit.y === col) {
+          return true;
+        }
+      }
+      
+      return null;
+    },
+
     getCellClass(row, col) {
       if (!this.game) {
         return "";
       }
 
   
-      let fleet = this.userGameData.fleet;
+      let fleet = this.ownerGameData.fleet;
+      let board = this.ownerGameData.board;
       
-      const isHit = false
-      const isMiss = false;
+      let classStyles = "cell"
 
       if (this.hasDeck(row, col, fleet, true)) {
-        return "cell deck hit";
+        classStyles += " deck hit";
       } else if (this.hasDeck(row, col, fleet)) {
-        return "cell deck";
-      } else if (isMiss) {
-        return "cell miss";
-      } else {
-        return "cell";
+        classStyles += " deck";
       }
+
+      if (this.hasHit(row, col, board)) {
+        classStyles += " hit"
+      }
+
+      return classStyles
+    },
+    getOponentCellClass(row, col) {
+      if (!this.game) {
+        return "";
+      }
+
+  
+      let fleet = this.oponentGameData.fleet;
+      let board = this.oponentGameData.board;
+      
+      let classStyles = "cell"
+
+      if (this.hasDeck(row, col, fleet, true)) {
+        classStyles += " deck hit hit-enemy";
+      }
+
+      if (this.hasHit(row, col, board)) {
+        classStyles += " hit"
+      }
+
+      return classStyles
     },
   }
 }
@@ -181,12 +242,14 @@ export default {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    margin-top: 20px;
   }
   .game-block {
-    outline: 2px solid #bb1c32;
+    outline: 20px solid #f5f5f5;
     display: flex;
     width: 30rem;
     height: 30rem;
+    background-color: #f5f5f5;
   }
 
 .row {
@@ -197,19 +260,48 @@ export default {
 
 .cell {
   flex: 1;
-  border: 1px solid #ccc;
+  border: 1px solid #9cbed1;
+}
+
+.oponent-board {
+  cursor: pointer;
 }
 
 .cell.deck {
-  background-color: #999;
+  background-color: #085486;
+}
+
+
+
+.cell.deck.hit {
+  background-color: #832634;
 }
 
 .cell.hit {
-  background-color: #bb1c32;
+  background-color: #aaaaaa;
+  position: relative;
+}
+.cell.hit-enemy {
+  background-color: #217925 !important;
 }
 
-.cell.miss {
-  background-color: #ccc;
+.cell.hit::before,
+.cell.hit::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50%;
+  height: 2px;
+  background-color: white;
+}
+
+.cell.hit::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.cell.hit::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
 }
   
 </style>

@@ -25,6 +25,17 @@ class GameService {
       });
   }
 
+  shot(data) {
+    return Axios
+      .post('/play/shot', data, { headers: authHeader() })
+      .then(response => {
+        if (response.data.game) {
+          localStorage.setItem('game', JSON.stringify(response.data.game));
+        }
+        return response.data.game;
+      });
+  }
+
 }
 
 export default new GameService();
