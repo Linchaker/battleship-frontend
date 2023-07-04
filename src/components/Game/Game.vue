@@ -38,15 +38,36 @@
 </template>
 
 <script>
+
+import io from 'socket.io-client';
+import authHeader from '@/services/auth-header'
+
 export default {
   name: 'Game',
   data() {
     return {
       game: null,
-      cells: [1,2,3,4,5,6,7,8,9,10],
+      socket: null,
     }
   },
   mounted() {
+
+    this.socket = io(import.meta.env.VITE_APP_SOCKET_URL, {
+      auth: {
+        token: authHeader().Authorization
+      }
+    });
+
+    this.socket.on('connect', () => {
+      console.log('Connected to WebSocket server');
+    });
+
+    this.socket.on('gameUpdate', (game) => {
+      console.log('Updated game state:', game);
+      this.game = game
+    });
+
+    
     const gameId = this.$route.params.gameId;
     if (this.$store.state.play.status.gameIsset) {
       this.game = this.$store.state.play.game
@@ -57,9 +78,6 @@ export default {
         this.startGame()
       }
     }
-    
-    // this.game = JSON.parse('{"status":"not_started","ownerStatus":"not_ready","oponentStatus":"not_ready","data":{"ownerData":{"board":{"size":10,"hits":[],"occupied":[{"x":10,"y":10}]},"fleet":[{"size":1,"orientation":"x","position":{"x":10,"y":10},"state":[{"deck":1,"position":{"x":10,"y":10},"status":true}],"status":true},{"size":1,"orientation":"x","position":{"x":7,"y":2},"state":[{"deck":1,"position":{"x":7,"y":2},"status":true}],"status":true},{"size":1,"orientation":"x","position":{"x":3,"y":9},"state":[{"deck":1,"position":{"x":3,"y":9},"status":true}],"status":true},{"size":1,"orientation":"x","position":{"x":8,"y":9},"state":[{"deck":1,"position":{"x":8,"y":9},"status":true}],"status":true}]}},"_id":"6498624b9d9ab7f711962cc7"}')
-    // console.log(this.game);
   },
   computed: {
     currentUser() {
@@ -95,9 +113,8 @@ export default {
     game: {
       immediate: true, // Вызвать хэндлер при создании компонента
       handler(newValue, oldValue) {
-        // Проверяем, что игровые данные заполнены (например, у нас есть поля deck, hit, miss)
         if (newValue && newValue.data && newValue.data.ownerData) {
-          // Вызываем getCellClass для обновления стилей клеток
+          // call getCellClass for update board
           this.getCellClass();
         }
       },
@@ -127,13 +144,22 @@ export default {
         position
       }
       
-      this.$store.dispatch('play/shot', data).then(
-            (game) => {
-              console.log(game);
-              this.game = game
-            },
-            error => console.log(error)
-          );
+      this.socket.emit("playerShot",data, (response) => {
+        if (response.success) {
+          console.log("Выстрел выполнен успешно:", response);
+        } else {
+          console.error("Ошибка выстрела:", response);
+        }
+      });
+      
+      // old logic
+      // this.$store.dispatch('play/shot', data).then(
+      //       (game) => {
+      //         console.log(game);
+      //         this.game = game
+      //       },
+      //       error => console.log(error)
+      //     );
     },
 
     hasDeck(row, col, fleet, isHit = false) {
@@ -216,15 +242,19 @@ export default {
 
 // план
 /**
- * создание игры и сохранение в стор
- * 
- * инициализация игры при переходе по ссылке
- * если это опонент, сохраняем его как апонента, если по ссылке перешел владелец, просто открываем игру
- * если опонент не залогинен, нужно редиректить его на игру после логина
- * 
+ 
  * кнопка готов
  * 
  * смена вида / начало игры при готов обоем пользователям
+ * 
+ * 
+ * сокеты
+ * 
+ * очередность ходов и статусы игры
+ * 
+ * кнопка сдаться
+ * 
+ * win/lost
  * 
  */
 

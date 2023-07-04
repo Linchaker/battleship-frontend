@@ -30,8 +30,7 @@
   }
 
   onMounted(() => {
-    console.log(`the component is now mounted.`)
-    console.log(props.currentUser)
+    // example
   })
 
 
