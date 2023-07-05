@@ -45,6 +45,11 @@ const initialState = game
           }
         );
       },
+
+      updateGame({ commit }, game) {
+        localStorage.setItem('game', JSON.stringify(game));
+        commit('updateGameSuccess', game);
+      },
     },
     mutations: {
       createGameSuccess(state, game) {
@@ -64,6 +69,10 @@ const initialState = game
         state.game = null;
       },
       shotSuccess(state, game) {
+        state.status.gameIsset = true;
+        state.game = game;
+      },
+      updateGameSuccess(state, game) {
         state.status.gameIsset = true;
         state.game = game;
       },

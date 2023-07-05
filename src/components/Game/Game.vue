@@ -51,23 +51,6 @@ export default {
     }
   },
   mounted() {
-
-    this.socket = io(import.meta.env.VITE_APP_SOCKET_URL, {
-      auth: {
-        token: authHeader().Authorization
-      }
-    });
-
-    this.socket.on('connect', () => {
-      console.log('Connected to WebSocket server');
-    });
-
-    this.socket.on('gameUpdate', (game) => {
-      console.log('Updated game state:', game);
-      this.game = game
-    });
-
-    
     const gameId = this.$route.params.gameId;
     if (this.$store.state.play.status.gameIsset) {
       this.game = this.$store.state.play.game
@@ -78,6 +61,27 @@ export default {
         this.startGame()
       }
     }
+
+
+    this.socket = io(import.meta.env.VITE_APP_SOCKET_URL, {
+      auth: {
+        token: authHeader().Authorization
+      }
+    });
+
+    this.socket.on('connect', () => {
+      console.log('Connected to WebSocket server');
+
+
+      this.socket.emit('joinGame', {gameId: this.game?._id ? this.game._id : gameId });
+    });
+
+    this.socket.on('gameUpdate', (game) => {
+      console.log('Updated game state:', game);
+      this.game = game
+      this.$store.dispatch('play/updateGame', game)
+    });
+
   },
   computed: {
     currentUser() {
@@ -146,7 +150,7 @@ export default {
       
       this.socket.emit("playerShot",data, (response) => {
         if (response.success) {
-          console.log("Выстрел выполнен успешно:", response);
+          console.log(response.message);
         } else {
           console.error("Ошибка выстрела:", response);
         }
@@ -216,11 +220,11 @@ export default {
       return classStyles
     },
     getOponentCellClass(row, col) {
-      if (!this.game) {
+      if (!this.game || !this.oponentGameData) {
         return "";
       }
 
-  
+      
       let fleet = this.oponentGameData.fleet;
       let board = this.oponentGameData.board;
       
