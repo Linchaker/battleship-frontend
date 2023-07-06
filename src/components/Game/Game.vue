@@ -4,7 +4,7 @@
       <RouterLink target="_blank" class="btn-primary mb-3" :to="{ name: 'game', params: { gameId: game ? game._id : '' } }">Game ID:  {{ game ? game._id : '' }}</RouterLink>
     </div>
     <div class="game-wrapper">
-      <div class="game-block">
+      <div v-if="gameState.status == 'started'" class="game-block">
         <div
           v-for="row in boardSize"
           :key="row"
@@ -18,12 +18,17 @@
           </div>
         </div>
       </div>
-      <div class="game-block">
-        <div
-          v-for="row in boardSize"
-          :key="row"
-          class="row"
-        >
+
+      <div v-else class="game-block">
+          <user-status :status="gameState.ownerStatus" :onwerBlock="true" @setReady="handleSetReady"></user-status>
+      </div>
+
+      <div v-if="gameState.status == 'started'" class="game-block">
+          <div
+            v-for="row in boardSize"
+            :key="row"
+            class="row"
+          >
           <div
             v-for="col in boardSize"
             :key="col"
@@ -33,6 +38,10 @@
           ></div>
         </div>
       </div>
+
+      <div v-else class="game-block">
+        <user-status :status="gameState.oponentStatus" :onwerBlock="false"></user-status>
+      </div>
     </div>
   </div>
 </template>
@@ -41,12 +50,21 @@
 
 import io from 'socket.io-client';
 import authHeader from '@/services/auth-header'
+import UserStatus from '@/components/Game/UserStatus.vue';
 
 export default {
   name: 'Game',
+  components: {
+    UserStatus
+  },
   data() {
     return {
       game: null,
+      state: {
+        oponentStatus:"not_ready",
+        ownerStatus: "not_ready",
+        status: "not_started",
+      },
       socket: null,
     }
   },
@@ -111,7 +129,26 @@ export default {
       } else {
         return this.game.data.ownerData
       }
+    },
+    gameState() {
+      if (!this.game) {
+        return this.state;
+      }
+
+      this.state.status = this.game.status
+
+      if (this.game.ownerUserId === this.currentUser._id) {
+        this.state.oponentStatus = this.game.oponentStatus ?? "not_ready"
+        this.state.ownerStatus = this.game.ownerStatus
+      } else {
+        this.state.oponentStatus = this.game.ownerStatus
+        this.state.ownerStatus = this.game.oponentStatus
+      }
+
+      console.log(this.state);
+      return this.state
     }
+
   },
   watch: {
     game: {
@@ -240,6 +277,13 @@ export default {
 
       return classStyles
     },
+    
+    handleSetReady() {
+      const data = {
+        gameId: this.game._id,
+      }
+      this.socket.emit('setReady', data)
+    }
   }
 }
 
