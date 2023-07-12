@@ -23,6 +23,10 @@
           <user-status :status="gameState.ownerStatus" :onwerBlock="true" @setReady="handleSetReady"></user-status>
       </div>
 
+      <div :class="['nextMoveTracker', nextMoveUserId === currentUser._id ? 'green' : 'red']" v-if="gameState.status == 'started'">
+        {{ nextMoveUserId == currentUser._id ? 'Your turn' : 'Oponent turn' }}
+      </div>
+
       <div v-if="gameState.status == 'started'" class="game-block">
           <div
             v-for="row in boardSize"
@@ -33,7 +37,7 @@
             v-for="col in boardSize"
             :key="col"
             class="cell oponent-board"
-            @click="shot(row, col)"
+            @click="shot($event, row, col)"
             :class="getOponentCellClass(row, col)"
           ></div>
         </div>
@@ -145,8 +149,14 @@ export default {
         this.state.ownerStatus = this.game.oponentStatus
       }
 
-      console.log(this.state);
       return this.state
+    },
+    nextMoveUserId() {
+      if (!this.game) {
+        return null;
+      }
+
+      return this.game.nextMoveUserId;
     }
 
   },
@@ -178,11 +188,16 @@ export default {
             error => console.log(error)
           );
     },
-    shot(row, col) {
+    shot(event, row, col) {
       const position = {x: row, y: col}
       const data = {
         gameId: this.game._id,
         position
+      }
+
+      if (this.game.nextMoveUserId !== this.currentUser._id) {
+        this.showWrongMoveError(event.target)
+        return;
       }
       
       this.socket.emit("playerShot",data, (response) => {
@@ -283,6 +298,14 @@ export default {
         gameId: this.game._id,
       }
       this.socket.emit('setReady', data)
+    },
+
+    showWrongMoveError(target) {
+      target.classList.add('wrong-move');
+
+      setTimeout(() => {
+        target.classList.remove('wrong-move');
+      }, 300);
     }
   }
 }
@@ -291,18 +314,22 @@ export default {
 // план
 /**
  
- * кнопка готов
- * 
- * смена вида / начало игры при готов обоем пользователям
+ *
  * 
  * 
- * сокеты
  * 
- * очередность ходов и статусы игры
+ * 
+ *
+ * 
+ *  статусы игры
+ * 
+ * 
  * 
  * кнопка сдаться
  * 
  * win/lost
+ * 
+ * гугл аутентификация
  * 
  */
 
@@ -338,7 +365,7 @@ export default {
 
 .cell {
   flex: 1;
-  border: 1px solid #9cbed1;
+  border: 1px solid #bdc2c5;
 }
 
 .oponent-board {
@@ -380,6 +407,22 @@ export default {
 
 .cell.hit::after {
   transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.nextMoveTracker {
+  font-weight: 700;
+}
+
+.nextMoveTracker.red {
+  color: #832634;
+}
+
+.nextMoveTracker.green {
+  color: #217925;
+}
+
+.wrong-move {
+  background-color: #c52222;
 }
   
 </style>
