@@ -23,17 +23,20 @@
           <user-status :status="gameState.ownerStatus" :ownerBlock="true" @setReady="handleSetReady"></user-status>
       </div>
 
-      <div :class="['nextMoveTracker', nextMoveUserId === currentUser._id ? 'green' : 'red']" v-if="gameState.status == 'started'">
-        {{ nextMoveUserId == currentUser._id ? 'Your turn' : 'Oponent turn' }}
-      </div>
+      <div>
+        <div :class="['nextMoveTracker', nextMoveUserId === currentUser._id ? 'green' : 'red']" v-if="gameState.status == 'started'">
+          {{ nextMoveUserId == currentUser._id ? 'Your turn' : 'Oponent turn' }}
+        </div>
 
-      <div class="nextMoveTracker" v-if="gameState.status == 'started' || gameState.ownerStatus == 'ready'">
-        <button class="btn btn-danger" @click.prevent="handleSetEndGame">Finish the game</button>
-      </div>
+        <div class="" v-if="gameState.status == 'started' || gameState.ownerStatus == 'ready'">
+          <button class="btn btn-danger" @click.prevent="handleSetEndGame">Finish the game</button>
+        </div>
 
-      <div class="nextMoveTracker" v-if="gameState.status == 'ended' || !game">
-        <button class="btn btn-secondary" @click.prevent="startNewGame">New game</button>
+        <div class="" v-if="gameState.status == 'ended' || !game">
+          <button class="btn btn-secondary" @click.prevent="startNewGame">New game</button>
+        </div>
       </div>
+      
 
       <div v-if="gameState.status == 'started'" class="game-block">
           <div
@@ -425,6 +428,9 @@ export default {
 
 .nextMoveTracker {
   font-weight: 700;
+  color: #217925;
+  margin: 0 auto 10px;
+  text-align: center;
 }
 
 .nextMoveTracker.red {
