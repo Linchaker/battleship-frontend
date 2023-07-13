@@ -2,7 +2,7 @@
   <div class="container">
     <header>
       <Logo />
-      <Menu :currentUser="currentUser" />
+      <Menu :currentUser="currentUser" :gameStatus="gameStatus" />
     </header>
     <RouterView />
   </div>
@@ -21,6 +21,9 @@ export default {
   computed: {
     currentUser() {
       return this.$store.state.auth.user;
+    },
+    gameStatus() {
+      return this.$store.state.play.status.gameStatus;
     },
   }
 }

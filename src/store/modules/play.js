@@ -3,8 +3,8 @@ import GameService from '@/services/game.service';
 const game = JSON.parse(localStorage.getItem('game'));
 
 const initialState = game
-  ? { status: { gameIsset: true}, game }
-  : { status: { gameIsset: false }, game: null };
+  ? { status: { gameIsset: true, gameStatus: game.status }, game }
+  : { status: { gameIsset: false, gameStatus: false }, game: null };
 
   export const play = {
     namespaced: true,
@@ -13,6 +13,7 @@ const initialState = game
       createGame({ commit }) {
         return GameService.createGame().then(
           game => {
+            console.log('hery 3');
             commit('createGameSuccess', game);
             return Promise.resolve(game);
           },
@@ -50,31 +51,46 @@ const initialState = game
         localStorage.setItem('game', JSON.stringify(game));
         commit('updateGameSuccess', game);
       },
+      clearGame({ commit }) {
+        localStorage.removeItem('game');
+        commit('clearGameSucces');
+      },
     },
     mutations: {
       createGameSuccess(state, game) {
         state.status.gameIsset = true;
+        state.status.gameStatus = game.status;
         state.game = game;
       },
       createGameFailure(state) {
         state.status.gameIsset = false;
+        state.status.gameStatus = false;
         state.game = null;
       },
       findGameSuccess(state, game) {
         state.status.gameIsset = true;
+        state.status.gameStatus = game.status;
         state.game = game;
       },
       findGameFailure(state) {
         state.status.gameIsset = false;
+        state.status.gameStatus = false;
         state.game = null;
       },
       shotSuccess(state, game) {
         state.status.gameIsset = true;
+        state.status.gameStatus = game.status;
         state.game = game;
       },
       updateGameSuccess(state, game) {
         state.status.gameIsset = true;
+        state.status.gameStatus = game.status;
         state.game = game;
+      },
+      clearGameSucces(state) {
+        state.status.gameIsset = false;
+        state.status.gameStatus = false;
+        state.game = null;
       },
     }
   };

@@ -20,11 +20,19 @@
       </div>
 
       <div v-else class="game-block">
-          <user-status :status="gameState.ownerStatus" :onwerBlock="true" @setReady="handleSetReady"></user-status>
+          <user-status :status="gameState.ownerStatus" :ownerBlock="true" @setReady="handleSetReady"></user-status>
       </div>
 
       <div :class="['nextMoveTracker', nextMoveUserId === currentUser._id ? 'green' : 'red']" v-if="gameState.status == 'started'">
         {{ nextMoveUserId == currentUser._id ? 'Your turn' : 'Oponent turn' }}
+      </div>
+
+      <div class="nextMoveTracker" v-if="gameState.status == 'started' || gameState.ownerStatus == 'ready'">
+        <button class="btn btn-danger" @click.prevent="handleSetEndGame">Finish the game</button>
+      </div>
+
+      <div class="nextMoveTracker" v-if="gameState.status == 'ended' || !game">
+        <button class="btn btn-secondary" @click.prevent="startNewGame">New game</button>
       </div>
 
       <div v-if="gameState.status == 'started'" class="game-block">
@@ -44,7 +52,7 @@
       </div>
 
       <div v-else class="game-block">
-        <user-status :status="gameState.oponentStatus" :onwerBlock="false"></user-status>
+        <user-status :status="gameState.oponentStatus" :ownerBlock="false"></user-status>
       </div>
     </div>
   </div>
@@ -74,36 +82,16 @@ export default {
   },
   mounted() {
     const gameId = this.$route.params.gameId;
-    if (this.$store.state.play.status.gameIsset) {
-      this.game = this.$store.state.play.game
-    } else {
-      if (gameId) {
-        this.findGame(gameId)
+      if (this.$store.state.play.status.gameIsset) {
+        this.game = this.$store.state.play.game
+        this.initSocket()
       } else {
-        this.startGame()
+        if (gameId) {
+          this.findGame(gameId)
+        } else {
+          this.startGame()
+        }
       }
-    }
-
-
-    this.socket = io(import.meta.env.VITE_APP_SOCKET_URL, {
-      auth: {
-        token: authHeader().Authorization
-      }
-    });
-
-    this.socket.on('connect', () => {
-      console.log('Connected to WebSocket server');
-
-
-      this.socket.emit('joinGame', {gameId: this.game?._id ? this.game._id : gameId });
-    });
-
-    this.socket.on('gameUpdate', (game) => {
-      console.log('Updated game state:', game);
-      this.game = game
-      this.$store.dispatch('play/updateGame', game)
-    });
-
   },
   computed: {
     currentUser() {
@@ -172,10 +160,31 @@ export default {
     },
   },
   methods: {
+    initSocket() {
+      this.socket = io(import.meta.env.VITE_APP_SOCKET_URL, {
+        auth: {
+          token: authHeader().Authorization
+        }
+      });
+
+      this.socket.on('connect', () => {
+        console.log('Connected to WebSocket server');
+
+
+        this.socket.emit('joinGame', {gameId: this.game?._id ? this.game._id : gameId });
+      });
+
+      this.socket.on('gameUpdate', (game) => {
+        this.game = game
+        this.$store.dispatch('play/updateGame', game)
+      });
+    },
     startGame() {
       this.$store.dispatch('play/createGame').then(
             (game) => {
               this.game = game
+              console.log('hery2');
+              this.initSocket()
             },
             error => console.log(error)
           );
@@ -184,10 +193,12 @@ export default {
       this.$store.dispatch('play/findGame', gameId).then(
             (game) => {
               this.game = game
+              this.initSocket()
             },
             error => console.log(error)
           );
     },
+
     shot(event, row, col) {
       const position = {x: row, y: col}
       const data = {
@@ -200,7 +211,7 @@ export default {
         return;
       }
       
-      this.socket.emit("playerShot",data, (response) => {
+      this.socket.emit("playerShot", data, (response) => {
         if (response.success) {
           console.log(response.message);
         } else {
@@ -208,14 +219,6 @@ export default {
         }
       });
       
-      // old logic
-      // this.$store.dispatch('play/shot', data).then(
-      //       (game) => {
-      //         console.log(game);
-      //         this.game = game
-      //       },
-      //       error => console.log(error)
-      //     );
     },
 
     hasDeck(row, col, fleet, isHit = false) {
@@ -299,6 +302,29 @@ export default {
       }
       this.socket.emit('setReady', data)
     },
+    handleSetEndGame() {
+      const data = {
+        gameId: this.game._id,
+      }
+
+      this.socket.emit("setEndGame", data, (response) => {
+        if (response.success) {
+          //
+        } else {
+          console.error("setEndGame error:", response);
+        }
+      });
+    },
+
+    startNewGame() {
+      this.$store.dispatch('play/clearGame').then(
+            (game) => {
+              this.game = null
+              window.location.href = '/game';
+            },
+            error => console.log(error)
+          );
+    },
 
     showWrongMoveError(target) {
       target.classList.add('wrong-move');
@@ -313,23 +339,11 @@ export default {
 
 // план
 /**
- 
  *
- * 
- * 
- * 
- * 
- *
- * 
- *  статусы игры
- * 
- * 
- * 
- * кнопка сдаться
- * 
- * win/lost
  * 
  * гугл аутентификация
+ * 
+ * статистика
  * 
  */
 

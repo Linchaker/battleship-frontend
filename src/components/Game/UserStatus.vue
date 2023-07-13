@@ -1,7 +1,7 @@
 <template>
     <div class="wrapper">
         <div class="user-status" v-if="status == 'not_ready'">
-            <div v-if="onwerBlock">
+            <div v-if="ownerBlock">
                 <button @click="setReady" class="btn btn-secondary btn-lg">I'm ready</button>
             </div>
             <div v-else>
@@ -9,19 +9,19 @@
             </div>
             
         </div>
-        <div class="user-status looser" v-else-if="status == 'looser'">
-            Looser
+        <div class="user-status loser" v-else-if="status == 'loser'">
+          {{ ownerBlock ? 'You Lose!' : 'Oponent Looooooser :)' }}
         </div>
         <div class="user-status winner" v-else-if="status == 'winner'">
-          Winner
+          {{ ownerBlock ? 'You Winner!' : 'Oponent Winner :(' }}
         </div>
         <div class="user-status" v-else-if="status == 'ready'">
-          <div v-if="onwerBlock">
-                You ready!
-            </div>
-            <div v-else>
-                Oponent Ready!
-            </div>
+          <div v-if="ownerBlock">
+            You ready!
+          </div>
+          <div v-else>
+            Oponent Ready!
+          </div>
         </div>
     </div>
 </template>
@@ -30,7 +30,7 @@
 export default {
   props: [
     'status',
-    'onwerBlock'
+    'ownerBlock'
 ],
 methods: {
   setReady() {
@@ -58,7 +58,26 @@ methods: {
 }
 
 .user-status.winner {
-  color: #1787eb;
-  text-shadow: 2px 3px 1px #22567b;
+  color: #1c5d97;
+  border: 36px solid;
+  text-shadow: 2px 1px 14px #4d8bb7;
+  animation: blinkBorder 0.7s 3;
+}
+.user-status.loser {
+  color: #832634;
+  border: 36px solid;
+  text-shadow: 2px 1px 14px #df6565;
+}
+
+@keyframes blinkBorder {
+  0% {
+    border-color: #1c5d97;
+  }
+  50% {
+    border-color: #1c5d97;
+  }
+  100% {
+    border-color: white;
+  }
 }
 </style>

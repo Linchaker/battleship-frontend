@@ -7,6 +7,7 @@ class GameService {
     return Axios
       .post('/play', [], { headers: authHeader() })
       .then(response => {
+        console.log('hery 4');
         if (response.data.game) {
           localStorage.setItem('game', JSON.stringify(response.data.game));
         }
