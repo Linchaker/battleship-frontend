@@ -1,7 +1,7 @@
 <template>
   <div class="logo">
     <!-- <h1>BATTLESHIP</h1> -->
-    <img src="@/assets/images/logo.png" alt="Battleship" height="150">
+    <RouterLink to="/"><img src="@/assets/images/logo.png" alt="Battleship" height="150"></RouterLink>
   </div>
 </template>
 
