@@ -18,6 +18,14 @@
       </div>
       <button class="btn btn-secondary" type="submit">Sign In</button>
     </form>
+    <div class="container">
+      <div class="social-auth">
+        <a :href="getGoogleUrl(from)" class="google-auth btn btn-secondary mt-3">
+          <img :src="GoogleLogo" alt="Google Logo" />
+          <span>Google</span>
+        </a>
+      </div>
+    </div>
     <div class="mt-4">
       <p>Still no account? <RouterLink :to="{ name: 'register' }">Sign Up</RouterLink></p>
     </div>
@@ -25,6 +33,8 @@
 </template>
 
 <script>
+import GoogleLogo from '@/assets/images/google_logo.svg';
+import { getGoogleUrl } from '@/utils/getGoogleUrl';
 
 export default {
   data() {
@@ -40,6 +50,8 @@ export default {
       
       valid : false,
       submitted : false,
+      GoogleLogo,
+      from: '/',
     };
   },
   computed: {
@@ -53,6 +65,7 @@ export default {
     }
   },
   methods: {
+    getGoogleUrl,
     validateField: function(fieldName) {
       if (fieldName === 'email') {
         this.validEmail(this.formData.email);
@@ -136,5 +149,29 @@ export default {
   border: 1px solid grey;
   border-radius: 10px;
   padding: 10px;
+}
+
+.social-auth {
+  max-width: 27rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.google-auth {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease-in-out;
+}
+
+.google-auth img {
+  height: 1.2rem;
+  margin-right: 5px;
+  padding-bottom: 2px;
+}
+.google-auth:hover {
+  box-shadow: 0 1px 13px 0 rgb(0 0 0 / 15%);
 }
 </style>

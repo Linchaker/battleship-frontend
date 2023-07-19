@@ -23,6 +23,19 @@ const router = createRouter({
     },
 
     {
+      path: '/oauth',
+      name: 'OAuth',
+      redirect: '/oauth/google',
+      children: [
+        {
+          path: 'google',
+          name: 'login_google',
+          component: () => import('../components/Auth/LoginGoogle.vue'),
+        },
+      ],
+    },
+
+    {
       path: '/',
       name: 'home',
       meta: { auth: true },

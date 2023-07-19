@@ -345,6 +345,7 @@ export default {
  *
  * 
  * гугл аутентификация
+ * https://codevoweb.com/google-oauth-authentication-vue-and-node/
  * 
  * статистика
  * 

@@ -22,6 +22,17 @@ const initialState = user
           }
         );
       },
+      loginGoogle({ commit }, data) {
+        if (data.token && data.user) {
+          localStorage.setItem('token', JSON.stringify(data.token));
+          localStorage.setItem('user', JSON.stringify(data.user));
+          commit('loginSuccess', data.user);
+          return Promise.resolve(user);
+        } else {
+          commit('loginFailure');
+          return Promise.reject(error);
+        }
+      },
       logout({ commit }) {
         AuthService.logout();
         commit('logout');
